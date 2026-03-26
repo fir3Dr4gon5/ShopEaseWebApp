@@ -1,0 +1,15 @@
+﻿@page "{id:int}"
+@model ShopEaseWebApp.Pages.ProductDetailsModel
+@{
+}
+
+<h1>@Model.Product.Name</h1>
+<p>@Model.Product.Description</p>
+<p>£@Model.Product.Price</p>
+<p>In Stock: @Model.Product.StockQuantity</p>
+
+<form method="post" asp-route-id="@Model.Product.Id">
+    <label>Quantity</label>
+    <input asp-for="Quantity" type="number" min="1" max="@Model.Product.StockQuantity" value="1" />
+    <button type="submit">Add to Cart</button>
+</form>

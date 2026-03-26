@@ -1,0 +1,45 @@
+﻿@page
+@model ShopEaseWebApp.Pages.CartModel
+@{
+}
+
+<h1>Your Cart</h1>
+
+@if (Model.CartItems.Count == 0)
+{
+    <p>Your cart is empty.</p>
+    <a asp-page="/Products">Continue Shopping</a>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.CartItems)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>£@item.Product.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>£@(item.Product.Price * item.Quantity)</td>
+                    <td>
+                        <form method="post">
+                            <button asp-page-handler="Remove" asp-route-cartItemId="@item.Id">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p>Total: £@Model.Total</p>
+    <a asp-page="/Checkout">Proceed to Checkout</a>
+}

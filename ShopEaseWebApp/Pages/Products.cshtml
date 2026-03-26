@@ -1,0 +1,18 @@
+﻿@page
+@model ShopEaseWebApp.Pages.ProductsModel
+@{
+}
+<h1>Our Products</h1>
+
+<div>
+    @foreach (var product in Model.Products)
+    {
+        <div>
+            <h3>@product.Name</h3>
+            <p>@product.Description</p>
+            <p>£@product.Price</p>
+            <p>In Stock: @product.StockQuantity</p>
+            <a asp-page="/ProductDetails" asp-route-id="@product.Id">View Details</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,46 @@
+﻿@page
+@model ShopEaseWebApp.Pages.CheckoutModel
+@{
+}
+
+<h1>Checkout</h1>
+
+<h3>Order Summary</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.CartItems)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>£@(item.Product.Price * item.Quantity)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>Total: £@Model.Total</p>
+
+<h3>Shipping Details</h3>
+<form method="post">
+    <div>
+        <label>Address</label>
+        <input asp-for="ShippingAddress" />
+    </div>
+    <div>
+        <label>City</label>
+        <input asp-for="City" />
+    </div>
+    <div>
+        <label>Post Code</label>
+        <input asp-for="PostCode" />
+    </div>
+    <button type="submit">Place Order</button>
+</form>

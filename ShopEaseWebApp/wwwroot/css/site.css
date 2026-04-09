@@ -20,3 +20,18 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Products grid: reserved image area; empty when no ImageUrl */
+.products-page .product-card-img {
+  aspect-ratio: 4 / 3;
+  min-height: 10rem;
+  background-color: var(--bs-light);
+  overflow: hidden;
+}
+
+.products-page .product-card-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

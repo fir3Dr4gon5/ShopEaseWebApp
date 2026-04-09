@@ -2,17 +2,29 @@
 @model ShopEaseWebApp.Pages.ProductsModel
 @{
 }
-<h1>Our Products</h1>
+<h1 class="mb-4">Our Products</h1>
 
-<div>
-    @foreach (var product in Model.Products)
-    {
-        <div>
-            <h3>@product.Name</h3>
-            <p>@product.Description</p>
-            <p>£@product.Price</p>
-            <p>In Stock: @product.StockQuantity</p>
-            <a asp-page="/ProductDetails" asp-route-id="@product.Id">View Details</a>
-        </div>
-    }
+<div class="products-page">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model.Products)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="product-card-img">
+                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="@product.Name" />
+                        }
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">@product.Name</h2>
+                        <p class="card-text text-muted small flex-grow-1">@product.Description</p>
+                        <p class="card-text mb-1"><strong>£@product.Price</strong></p>
+                        <p class="card-text small text-muted mb-3">In stock: @product.StockQuantity</p>
+                        <a class="btn btn-primary mt-auto" asp-page="/ProductDetails" asp-route-id="@product.Id">View details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>

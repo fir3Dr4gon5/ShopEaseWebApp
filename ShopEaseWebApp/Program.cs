@@ -20,6 +20,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
         options.Password.RequireUppercase = true;        
 
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 
@@ -46,6 +47,19 @@ app.UseRouting();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    const string adminRoleName = "Admin";
+    if (!roleManager.RoleExistsAsync(adminRoleName).GetAwaiter().GetResult())
+    {
+        roleManager.CreateAsync(new IdentityRole(adminRoleName)).GetAwaiter().GetResult();
+    }
+
+    const string customerRoleName = "Customer";
+    if (!roleManager.RoleExistsAsync(customerRoleName).GetAwaiter().GetResult())
+    {
+        roleManager.CreateAsync(new IdentityRole(customerRoleName)).GetAwaiter().GetResult();
+    }
 
     if (!context.Products.Any())
     {
@@ -64,7 +78,38 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var userManager = context.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
+        var user = await userManager.GetUserAsync(context.User);
+
+        if (user is not null)
+        {
+            var userRoles = await userManager.GetRolesAsync(user);
+            if (!userRoles.Any())
+            {
+                await userManager.AddToRoleAsync(user, "Customer");
+            }
+        }
+    }
+
+    await next();
+});
+
+app.MapGet("/", (HttpContext context) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        return Results.Redirect("/Products");
+    }
+
+    return Results.Redirect("/Identity/Account/Login");
+});
 
 app.MapRazorPages();
 

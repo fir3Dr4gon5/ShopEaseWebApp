@@ -1,16 +1,49 @@
 ﻿@page "{id:int}"
 @model ShopEaseWebApp.Pages.ProductDetailsModel
 @{
+    ViewData["Title"] = Model.Product?.Name ?? "Product Details";
 }
 
-<h1>@Model.Product.Name</h1>
-<p>@Model.Product.Description</p>
-<p>£@Model.Product.Price</p>
-<p>In Stock: @Model.Product.StockQuantity</p>
+<div class="product-details-page">
+    <a asp-page="/Products" class="btn btn-outline-secondary btn-sm mb-3">Back to Products</a>
 
-<form method="post" asp-route-id="@Model.Product.Id">
-    <label>Quantity</label>
-    <input asp-for="Quantity" type="number" min="1" max="@Model.Product.StockQuantity" value="1" />
-    <span asp-validation-for="Quantity" class="text-danger"></span>
-    <button type="submit">Add to Cart</button>
-</form>
+    <div class="card shadow-sm border-0">
+        <div class="row g-0">
+            <div class="col-lg-6">
+                <div class="product-details-img-wrap">
+                    @if (!string.IsNullOrWhiteSpace(Model.Product!.ImageUrl))
+                    {
+                        <img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" class="product-details-img" />
+                    }
+                    else
+                    {
+                        <div class="product-details-no-img">No image available</div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card-body p-4 p-lg-5">
+                    <h1 class="h3 mb-3">@Model.Product.Name</h1>
+                    <p class="text-muted mb-4">@Model.Product.Description</p>
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="product-price">£@Model.Product.Price.ToString("0.00")</div>
+                        <span class="badge text-bg-light border text-dark">In Stock: @Model.Product.StockQuantity</span>
+                    </div>
+
+                    <form method="post" asp-route-id="@Model.Product.Id" class="row g-3 align-items-end">
+                        <div class="col-sm-5">
+                            <label asp-for="Quantity" class="form-label">Quantity</label>
+                            <input asp-for="Quantity" type="number" min="1" max="@Model.Product.StockQuantity" value="1" class="form-control" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-7">
+                            <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

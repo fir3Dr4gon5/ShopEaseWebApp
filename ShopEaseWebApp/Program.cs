@@ -48,6 +48,17 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var productImagePaths = new Dictionary<string, string>
+    {
+        ["Men's White T-Shirt"] = "/images/Products/White T Shirt.jpg",
+        ["Women's Jeans"] = "/images/Products/Womens Jeans.jpg",
+        ["Leather Wallet"] = "/images/Products/Leather Wallet.jpg",
+        ["Sunglasses"] = "/images/Products/Sun Glasses.jpg",
+        ["Canvas Sneakers"] = "/images/Products/Sneakers.jpg",
+        ["Wool Scarf"] = "/images/Products/Wool Scarf.jpg",
+        ["Leather Belt"] = "/images/Products/Leather Belt.jpg",
+        ["Hooded Sweatshirt"] = "/images/Products/Hooded SweatShirt.jpg"
+    };
 
     const string adminRoleName = "Admin";
     if (!roleManager.RoleExistsAsync(adminRoleName).GetAwaiter().GetResult())
@@ -74,6 +85,24 @@ using (var scope = app.Services.CreateScope())
             new Product { Name = "Hooded Sweatshirt", Description = "Pullover hoodie in grey marl", Price = 29.99m, StockQuantity = 90 }
         );
 
+        context.SaveChanges();
+    }
+
+    var products = context.Products.ToList();
+    var didUpdateImageUrls = false;
+
+    foreach (var product in products)
+    {
+        if (productImagePaths.TryGetValue(product.Name, out var imagePath) &&
+            !string.Equals(product.ImageUrl, imagePath, StringComparison.Ordinal))
+        {
+            product.ImageUrl = imagePath;
+            didUpdateImageUrls = true;
+        }
+    }
+
+    if (didUpdateImageUrls)
+    {
         context.SaveChanges();
     }
 }

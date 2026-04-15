@@ -13,6 +13,9 @@ namespace ShopEaseWebApp.Models
         public string City { get; set; } = null!;
         public string PostCode { get; set; } = null!;
         public string Status { get; set; } = null!;
+        public string? StripeCheckoutSessionId { get; set; }
+        public string? StripePaymentIntentId { get; set; }
+        public string? PaymentStatus { get; set; }
 
         public IdentityUser User { get; set; } = null!;
         public List<OrderItem> OrderItems { get; set; } = null!;

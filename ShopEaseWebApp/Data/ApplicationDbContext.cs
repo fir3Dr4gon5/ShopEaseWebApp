@@ -31,6 +31,11 @@ namespace ShopEaseWebApp.Data
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Order>()
+                .HasIndex(o => o.StripeCheckoutSessionId)
+                .IsUnique()
+                .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
         }
     }
 }

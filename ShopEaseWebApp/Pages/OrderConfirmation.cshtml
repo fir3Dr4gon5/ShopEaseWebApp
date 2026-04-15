@@ -1,4 +1,51 @@
 ﻿@page
 @model ShopEaseWebApp.Pages.OrderConfirmationModel
 @{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<h1>Order Confirmation</h1>
+
+@if (Model.IsPending)
+{
+    <div class="alert alert-info" role="alert">
+        Payment received. We are finalising your order now.
+    </div>
+    <p>If this page does not update within a few seconds, refresh it.</p>
+    @if (!string.IsNullOrWhiteSpace(Model.SessionId))
+    {
+        <a class="btn btn-primary" asp-page="/OrderConfirmation" asp-route-sessionId="@Model.SessionId">Refresh status</a>
+    }
+}
+else if (Model.Order is not null)
+{
+    <div class="alert alert-success" role="alert">
+        Thank you. Your payment was successful and your order is confirmed.
+    </div>
+
+    <p><strong>Order #:</strong> @Model.Order.Id</p>
+    <p><strong>Status:</strong> @Model.Order.Status</p>
+    <p><strong>Total:</strong> £@Model.Order.TotalAmount.ToString("0.00")</p>
+    <p><strong>Shipping:</strong> @Model.Order.ShippingAddress, @Model.Order.City, @Model.Order.PostCode</p>
+
+    <h3>Items</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Order.OrderItems)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>£@item.PriceAtPurchase.ToString("0.00")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }

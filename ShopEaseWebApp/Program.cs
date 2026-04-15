@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ShopEaseWebApp.Data;
 using ShopEaseWebApp.Models;
+using ShopEaseWebApp.Options;
+using ShopEaseWebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,16 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+builder.Services.AddScoped<StripeOrderFinalizationService>();
+builder.Services.Configure<StripeOptions>(
+    builder.Configuration.GetSection(StripeOptions.SectionName));
+
+var stripeSecretKey = builder.Configuration[$"{StripeOptions.SectionName}:SecretKey"];
+if (!string.IsNullOrWhiteSpace(stripeSecretKey))
+{
+    Stripe.StripeConfiguration.ApiKey = stripeSecretKey;
+}
 
 
 var app = builder.Build();
@@ -140,6 +152,7 @@ app.MapGet("/", (HttpContext context) =>
     return Results.Redirect("/Identity/Account/Login");
 });
 
+app.MapControllers();
 app.MapRazorPages();
 
 app.Run();

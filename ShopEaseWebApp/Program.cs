@@ -60,6 +60,8 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSeed");
     var productImagePaths = new Dictionary<string, string>
     {
         ["Men's White T-Shirt"] = "/images/Products/White T Shirt.jpg",
@@ -82,6 +84,77 @@ using (var scope = app.Services.CreateScope())
     if (!roleManager.RoleExistsAsync(customerRoleName).GetAwaiter().GetResult())
     {
         roleManager.CreateAsync(new IdentityRole(customerRoleName)).GetAwaiter().GetResult();
+    }
+
+    var adminSeed = app.Configuration.GetSection(AdminSeedOptions.SectionName).Get<AdminSeedOptions>() ?? new AdminSeedOptions();
+    var existingAdmins = userManager.GetUsersInRoleAsync(adminRoleName).GetAwaiter().GetResult();
+    if (existingAdmins.Count == 0)
+    {
+        var seedEmail = adminSeed.Email?.Trim() ?? string.Empty;
+        var seedPassword = adminSeed.Password ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(seedEmail) || string.IsNullOrWhiteSpace(seedPassword))
+        {
+            if (app.Environment.IsDevelopment()
+                && Environment.UserInteractive
+                && !Console.IsInputRedirected)
+            {
+                Console.WriteLine();
+                Console.WriteLine("No user has the Admin role. Enter credentials to create an admin account now.");
+                Console.WriteLine("(Or set AdminSeed:Email and AdminSeed:Password in appsettings / user secrets and restart — leave email blank and press Enter to skip.)");
+                Console.Write("Admin email: ");
+                var lineEmail = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(lineEmail))
+                {
+                    seedEmail = lineEmail.Trim();
+                    Console.Write("Admin password: ");
+                    seedPassword = Console.ReadLine() ?? string.Empty;
+                }
+                Console.WriteLine();
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(seedEmail) || string.IsNullOrWhiteSpace(seedPassword))
+        {
+            logger.LogWarning(
+                "No Admin user exists and none was created. Set {EmailKey} and {PasswordKey} in appsettings.json or user secrets, or run from a terminal in Development to be prompted at startup.",
+                $"{AdminSeedOptions.SectionName}:{nameof(AdminSeedOptions.Email)}",
+                $"{AdminSeedOptions.SectionName}:{nameof(AdminSeedOptions.Password)}");
+        }
+        else
+        {
+            var existingUser = userManager.FindByEmailAsync(seedEmail).GetAwaiter().GetResult();
+            if (existingUser is not null)
+            {
+                if (!userManager.IsInRoleAsync(existingUser, adminRoleName).GetAwaiter().GetResult())
+                {
+                    userManager.AddToRoleAsync(existingUser, adminRoleName).GetAwaiter().GetResult();
+                    logger.LogInformation("Assigned Admin role to existing user {Email}.", seedEmail);
+                }
+            }
+            else
+            {
+                var adminUser = new IdentityUser
+                {
+                    UserName = seedEmail,
+                    Email = seedEmail,
+                    EmailConfirmed = true
+                };
+                var createResult = userManager.CreateAsync(adminUser, seedPassword).GetAwaiter().GetResult();
+                if (createResult.Succeeded)
+                {
+                    userManager.AddToRoleAsync(adminUser, adminRoleName).GetAwaiter().GetResult();
+                    logger.LogInformation("Created Admin user {Email}.", seedEmail);
+                }
+                else
+                {
+                    foreach (var err in createResult.Errors)
+                    {
+                        logger.LogWarning("Admin user seed failed: {Code} {Description}", err.Code, err.Description);
+                    }
+                }
+            }
+        }
     }
 
     if (!context.Products.Any())

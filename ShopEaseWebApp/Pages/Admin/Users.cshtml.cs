@@ -3,16 +3,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using ShopEaseWebApp.Models.Admin;
 
-namespace ShopEaseWebApp.Pages
+namespace ShopEaseWebApp.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
-    public class DashboardModel : PageModel
+    public class UsersModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public DashboardModel(
+        public UsersModel(
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager)
         {
@@ -102,13 +103,6 @@ namespace ShopEaseWebApp.Pages
                     CurrentRole = roles.FirstOrDefault() ?? "None"
                 });
             }
-        }
-
-        public class UserRoleViewModel
-        {
-            public string Id { get; set; } = string.Empty;
-            public string Email { get; set; } = string.Empty;
-            public string CurrentRole { get; set; } = "None";
         }
     }
 }

@@ -18,7 +18,7 @@ namespace ShopEaseWebApp.Pages
             _context = context;
         }
 
-        public List<CartItem> CartItems { get; set; }
+        public List<CartItem> CartItems { get; set; } = new();
         public decimal Total { get; set; }
 
         public void OnGet()

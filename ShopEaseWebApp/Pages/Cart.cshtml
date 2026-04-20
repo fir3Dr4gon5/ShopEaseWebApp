@@ -1,45 +1,69 @@
 ﻿@page
 @model ShopEaseWebApp.Pages.CartModel
 @{
+    ViewData["Title"] = "Your Cart";
 }
 
-<h1>Your Cart</h1>
+<div class="shop-flow-page cart-page">
+    <a asp-page="/Products" class="btn btn-outline-secondary btn-sm mb-3">Continue shopping</a>
 
-@if (Model.CartItems.Count == 0)
-{
-    <p>Your cart is empty.</p>
-    <a asp-page="/Products">Continue Shopping</a>
-}
-else
-{
-    <table>
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.CartItems)
-            {
-                <tr>
-                    <td>@item.Product.Name</td>
-                    <td>£@item.Product.Price</td>
-                    <td>@item.Quantity</td>
-                    <td>£@(item.Product.Price * item.Quantity)</td>
-                    <td>
-                        <form method="post">
-                            <button asp-page-handler="Remove" asp-route-cartItemId="@item.Id">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <h1 class="h3 mb-4">Your cart</h1>
 
-    <p>Total: £@Model.Total</p>
-    <a asp-page="/Checkout">Proceed to Checkout</a>
-}
+    @if (Model.CartItems.Count == 0)
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center py-5 px-4">
+                <p class="text-muted mb-4 mb-lg-5">Your cart is empty.</p>
+                <a asp-page="/Products" class="btn btn-primary">Browse products</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in Model.CartItems)
+                    {
+                        var lineTotal = item.Product.Price * item.Quantity;
+                        <li class="list-group-item px-3 px-md-4 py-3">
+                            <div class="d-flex flex-column flex-sm-row gap-3 align-items-stretch align-items-sm-center">
+                                <div class="line-item-img-wrap mx-auto mx-sm-0">
+                                    @if (!string.IsNullOrWhiteSpace(item.Product.ImageUrl))
+                                    {
+                                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" />
+                                    }
+                                    else
+                                    {
+                                        <span class="line-item-no-img">No image</span>
+                                    }
+                                </div>
+                                <div class="flex-grow-1 min-w-0 text-center text-sm-start">
+                                    <h2 class="h6 mb-1">@item.Product.Name</h2>
+                                    <p class="text-muted small mb-2 d-none d-sm-block">@item.Product.Description</p>
+                                    <div class="d-flex flex-wrap justify-content-center justify-content-sm-start align-items-center gap-2 gap-sm-3 small">
+                                        <span class="text-muted">Each <strong class="text-dark">£@item.Product.Price.ToString("0.00")</strong></span>
+                                        <span class="text-muted">Qty <strong class="text-dark">@item.Quantity</strong></span>
+                                    </div>
+                                </div>
+                                <div class="text-center text-sm-end d-flex flex-sm-column align-items-center align-items-sm-end justify-content-between gap-2 flex-shrink-0">
+                                    <div class="line-item-price text-nowrap">£@lineTotal.ToString("0.00")</div>
+                                    <form method="post" class="d-inline">
+                                        <button type="submit" asp-page-handler="Remove" asp-route-cartItemId="@item.Id" class="btn btn-outline-danger btn-sm">Remove</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-0 pt-0 pb-4 px-3 px-md-4">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 pt-3 border-top">
+                    <span class="text-muted">Subtotal</span>
+                    <span class="order-total-display">£@Model.Total.ToString("0.00")</span>
+                </div>
+                <a asp-page="/Checkout" class="btn btn-primary w-100 mt-3">Proceed to checkout</a>
+            </div>
+        </div>
+    }
+</div>

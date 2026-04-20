@@ -4,53 +4,100 @@
     ViewData["Title"] = "Checkout";
 }
 
-<h1>Checkout</h1>
+<div class="shop-flow-page checkout-page">
+    <a asp-page="/Cart" class="btn btn-outline-secondary btn-sm mb-3">Back to cart</a>
 
-@if (Model.PaymentCancelled)
-{
-    <div class="alert alert-warning" role="alert">
-        Payment was cancelled. You can review your details and try again.
-    </div>
+    <h1 class="h3 mb-4">Checkout</h1>
+
+    @if (Model.PaymentCancelled)
+    {
+        <div class="alert alert-warning border-0 shadow-sm" role="alert">
+            Payment was cancelled. You can review your details and try again.
+        </div>
+    }
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (Model.CartItems.Count == 0)
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center py-5">
+                <p class="text-muted mb-4">Your cart is empty.</p>
+                <a asp-page="/Products" class="btn btn-primary">Browse products</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-5 order-lg-2">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h2 class="h5 mb-3">Order summary</h2>
+                        <ul class="list-group list-group-flush border rounded-2 mb-3">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                var lineTotal = item.Product.Price * item.Quantity;
+                                <li class="list-group-item px-3 py-3">
+                                    <div class="d-flex gap-3">
+                                        <div class="line-item-img-wrap line-item-img-wrap--compact">
+                                            @if (!string.IsNullOrWhiteSpace(item.Product.ImageUrl))
+                                            {
+                                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" />
+                                            }
+                                            else
+                                            {
+                                                <span class="line-item-no-img">No image</span>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="fw-semibold small">@item.Product.Name</div>
+                                            <div class="text-muted small">Qty @item.Quantity × £@item.Product.Price.ToString("0.00")</div>
+                                        </div>
+                                        <div class="line-item-price small text-nowrap align-self-start">£@lineTotal.ToString("0.00")</div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="text-muted">Total</span>
+                            <span class="order-total-display fs-4">£@Model.Total.ToString("0.00")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 order-lg-1">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4 p-lg-5">
+                        <h2 class="h5 mb-4">Shipping details</h2>
+                        <form method="post" class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="ShippingAddress" class="form-label">Address</label>
+                                <input asp-for="ShippingAddress" class="form-control" autocomplete="street-address" />
+                                <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="City" class="form-label">City</label>
+                                <input asp-for="City" class="form-control" autocomplete="address-level2" />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PostCode" class="form-label">Post code</label>
+                                <input asp-for="PostCode" class="form-control" autocomplete="postal-code" />
+                                <span asp-validation-for="PostCode" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12 pt-2">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">Continue to secure payment</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
-
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-<h3>Order Summary</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.CartItems)
-        {
-            <tr>
-                <td>@item.Product.Name</td>
-                <td>@item.Quantity</td>
-                <td>£@(item.Product.Price * item.Quantity)</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<p>Total: £@Model.Total</p>
-
-<h3>Shipping Details</h3>
-<form method="post">
-    <div>
-        <label>Address</label>
-        <input asp-for="ShippingAddress" />
-    </div>
-    <div>
-        <label>City</label>
-        <input asp-for="City" />
-    </div>
-    <div>
-        <label>Post Code</label>
-        <input asp-for="PostCode" />
-    </div>
-<button type="submit">Continue to Secure Payment</button>
-</form>

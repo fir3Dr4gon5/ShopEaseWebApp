@@ -4,5 +4,35 @@
     ViewData["Title"] = "Tickets";
 }
 
-<h1 class="h3">Tickets</h1>
-<p class="text-muted">Support tickets will go here.</p>
+<h1 class="h3 mb-3">Tickets</h1>
+
+@if (!Model.Tickets.Any())
+{
+    <div class="alert alert-info" role="alert">No tickets have been submitted yet.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Submitted At</th>
+                    <th>Submitted By</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in Model.Tickets)
+                {
+                    <tr>
+                        <td>@ticket.Title</td>
+                        <td>@ticket.Message</td>
+                        <td>@ticket.SubmittedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                        <td>@(ticket.User.Email ?? ticket.User.UserName ?? ticket.UserId)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ShopEaseWebApp.Models;
@@ -11,10 +11,12 @@ namespace ShopEaseWebApp.Data
             : base(options)
         {
         }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -36,6 +38,12 @@ namespace ShopEaseWebApp.Data
                 .HasIndex(o => o.StripeCheckoutSessionId)
                 .IsUnique()
                 .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+
+            builder.Entity<Ticket>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

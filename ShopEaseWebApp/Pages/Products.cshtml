@@ -5,6 +5,25 @@
 <h1 class="mb-4">Our Products</h1>
 
 <div class="products-page">
+    <form method="get" class="mb-4">
+        <label asp-for="SearchTerm" class="form-label">Search products</label>
+        <div class="input-group">
+            <input asp-for="SearchTerm" class="form-control" placeholder="Search by name or description" />
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+            @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+            {
+                <a asp-page="/Products" class="btn btn-outline-secondary">Clear</a>
+            }
+        </div>
+    </form>
+
+    @if (!Model.Products.Any())
+    {
+        <div class="alert alert-light border" role="status">
+            No products found for "<strong>@Model.SearchTerm</strong>".
+        </div>
+    }
+
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var product in Model.Products)
         {

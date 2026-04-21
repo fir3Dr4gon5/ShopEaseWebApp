@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShopEaseWebApp.Data;
 using ShopEaseWebApp.Models;
+using System.Security.Claims;
 
 namespace ShopEaseWebApp.Pages
 {
@@ -16,12 +17,13 @@ namespace ShopEaseWebApp.Pages
             _context = context;
         }
 
-        public List<Product> Products { get; set; }
+        public List<Product> Products { get; set; } = new();
+        public List<Product> RecommendedProducts { get; set; } = new();
         
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             var query = _context.Products.AsQueryable();
 
@@ -33,7 +35,48 @@ namespace ShopEaseWebApp.Pages
                     EF.Functions.Like(product.Description, $"%{trimmedSearch}%"));
             }
 
-            Products = query.ToList();
+            Products = await query.ToListAsync();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return;
+            }
+
+            var purchasedItems = await _context.OrderItems
+                .Where(orderItem => orderItem.Order.UserId == userId)
+                .Select(orderItem => new { orderItem.ProductId, orderItem.Product.Category })
+                .ToListAsync();
+
+            if (!purchasedItems.Any())
+            {
+                return;
+            }
+
+            var purchasedProductIds = purchasedItems
+                .Select(item => item.ProductId)
+                .Distinct()
+                .ToList();
+
+            var topCategories = purchasedItems
+                .Where(item => !string.IsNullOrWhiteSpace(item.Category))
+                .GroupBy(item => item.Category)
+                .OrderByDescending(group => group.Count())
+                .Select(group => group.Key)
+                .Take(3)
+                .ToList();
+
+            if (!topCategories.Any())
+            {
+                return;
+            }
+
+            RecommendedProducts = await _context.Products
+                .Where(product =>
+                    topCategories.Contains(product.Category) &&
+                    !purchasedProductIds.Contains(product.Id))
+                .Take(6)
+                .ToListAsync();
         }
     }
 }

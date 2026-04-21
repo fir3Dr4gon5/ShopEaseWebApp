@@ -71,7 +71,24 @@ using (var scope = app.Services.CreateScope())
         ["Canvas Sneakers"] = "/images/Products/Sneakers.jpg",
         ["Wool Scarf"] = "/images/Products/Wool Scarf.jpg",
         ["Leather Belt"] = "/images/Products/Leather Belt.jpg",
-        ["Hooded Sweatshirt"] = "/images/Products/Hooded SweatShirt.jpg"
+        ["Hooded Sweatshirt"] = "/images/Products/Hooded SweatShirt.jpg",
+        ["Joggers"] = "/images/Products/Joggers.jpg",
+        ["Running Trainers"] = "/images/Products/Running Trainers.jpg",
+        ["Graphic T Shirt"] = "/images/Products/Graphic T Shirt.jpg"
+    };
+    var productCategories = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Men's White T-Shirt"] = "Shirt",
+        ["Women's Jeans"] = "Clothing",
+        ["Leather Wallet"] = "Leather",
+        ["Sunglasses"] = "Accessories",
+        ["Canvas Sneakers"] = "Footwear",
+        ["Wool Scarf"] = "Accessories",
+        ["Leather Belt"] = "Leather",
+        ["Hooded Sweatshirt"] = "Shirt",
+        ["Joggers"] = "Clothing",
+        ["Running Trainers"] = "Footwear",
+        ["Graphic T Shirt"] = "Shirt"
     };
 
     const string adminRoleName = "Admin";
@@ -160,14 +177,17 @@ using (var scope = app.Services.CreateScope())
     if (!context.Products.Any())
     {
         context.Products.AddRange(
-            new Product { Name = "Men's White T-Shirt", Description = "Classic cotton crew neck t-shirt", Price = 12.99m, StockQuantity = 100 },
-            new Product { Name = "Women's Jeans", Description = "Slim fit mid-rise blue denim jeans", Price = 34.99m, StockQuantity = 75 },
-            new Product { Name = "Leather Wallet", Description = "Slim bifold genuine leather wallet", Price = 19.99m, StockQuantity = 60 },
-            new Product { Name = "Sunglasses", Description = "UV400 polarised sunglasses", Price = 24.99m, StockQuantity = 45 },
-            new Product { Name = "Canvas Sneakers", Description = "Casual lace up canvas shoes", Price = 27.99m, StockQuantity = 80 },
-            new Product { Name = "Wool Scarf", Description = "Soft knitted winter scarf", Price = 15.99m, StockQuantity = 55 },
-            new Product { Name = "Leather Belt", Description = "Classic brown leather belt", Price = 18.99m, StockQuantity = 70 },
-            new Product { Name = "Hooded Sweatshirt", Description = "Pullover hoodie in grey marl", Price = 29.99m, StockQuantity = 90 }
+            new Product { Name = "Men's White T-Shirt", Description = "Classic cotton crew neck t-shirt", Category = "Shirt", Price = 12.99m, StockQuantity = 100 },
+            new Product { Name = "Women's Jeans", Description = "Slim fit mid-rise blue denim jeans", Category = "Clothing", Price = 34.99m, StockQuantity = 75 },
+            new Product { Name = "Leather Wallet", Description = "Slim bifold genuine leather wallet", Category = "Leather", Price = 19.99m, StockQuantity = 60 },
+            new Product { Name = "Sunglasses", Description = "UV400 polarised sunglasses", Category = "Accessories", Price = 24.99m, StockQuantity = 45 },
+            new Product { Name = "Canvas Sneakers", Description = "Casual lace up canvas shoes", Category = "Footwear", Price = 27.99m, StockQuantity = 80 },
+            new Product { Name = "Wool Scarf", Description = "Soft knitted winter scarf", Category = "Accessories", Price = 15.99m, StockQuantity = 55 },
+            new Product { Name = "Leather Belt", Description = "Classic brown leather belt", Category = "Leather", Price = 18.99m, StockQuantity = 70 },
+            new Product { Name = "Hooded Sweatshirt", Description = "Pullover hoodie in grey marl", Category = "Shirt", Price = 29.99m, StockQuantity = 90 },
+            new Product { Name = "Joggers", Description = "Soft tapered fit joggers for daily wear", Category = "Clothing", Price = 26.99m, StockQuantity = 65 },
+            new Product { Name = "Running Trainers", Description = "Lightweight cushioned trainers for running", Category = "Footwear", Price = 49.99m, StockQuantity = 50 },
+            new Product { Name = "Graphic T Shirt", Description = "Cotton t shirt with bold front print", Category = "Shirt", Price = 16.99m, StockQuantity = 85 }
         );
 
         context.SaveChanges();
@@ -175,6 +195,7 @@ using (var scope = app.Services.CreateScope())
 
     var products = context.Products.ToList();
     var didUpdateImageUrls = false;
+    var didUpdateCategories = false;
 
     foreach (var product in products)
     {
@@ -184,9 +205,21 @@ using (var scope = app.Services.CreateScope())
             product.ImageUrl = imagePath;
             didUpdateImageUrls = true;
         }
+
+        if (productCategories.TryGetValue(product.Name, out var category) &&
+            !string.Equals(product.Category, category, StringComparison.Ordinal))
+        {
+            product.Category = category;
+            didUpdateCategories = true;
+        }
+        else if (string.IsNullOrWhiteSpace(product.Category))
+        {
+            product.Category = "Accessories";
+            didUpdateCategories = true;
+        }
     }
 
-    if (didUpdateImageUrls)
+    if (didUpdateImageUrls || didUpdateCategories)
     {
         context.SaveChanges();
     }

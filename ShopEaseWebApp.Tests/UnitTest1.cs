@@ -40,7 +40,7 @@ public class AccountPasswordValidationTests
 
     private Task<IdentityResult> ValidatePasswordAsync(string password)
     {
-        var options = Options.Create(new IdentityOptions());
+        var options = Microsoft.Extensions.Options.Options.Create(new IdentityOptions());
         options.Value.Password.RequiredLength = 8;
         options.Value.Password.RequireDigit = true;
         options.Value.Password.RequireUppercase = true;

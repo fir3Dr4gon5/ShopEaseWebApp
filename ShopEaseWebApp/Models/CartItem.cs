@@ -2,7 +2,6 @@
 
 namespace ShopEaseWebApp.Models
 {
-    // Models/CartItem.cs
     public class CartItem
     {
         public int Id { get; set; }

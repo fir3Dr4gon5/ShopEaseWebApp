@@ -2,7 +2,7 @@
 
 namespace ShopEaseWebApp.Models
 {
-    // Models/Order.cs
+
     public class Order
     {
         public int Id { get; set; }
